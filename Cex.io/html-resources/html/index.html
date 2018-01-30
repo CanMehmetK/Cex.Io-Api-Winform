@@ -1,0 +1,260 @@
+﻿<!doctype html>
+<html ng-app="cexApp">
+
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>My Angular App</title>
+    
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.1/nv.d3.min.css" />    
+
+
+</head>
+<body ng-controller="CexController">
+    <nvd3 options="options" data="gdata" api="api" class="with-3d-shadow with-transitions"></nvd3>
+    USD: {{data.Account_balance.USD.Available | number:2}} | XRP: {{data.Account_balance.XRP.Available | number:2}}
+    <div class="row">
+        <div class="col-md-6">
+            <table>
+                <tr>
+                    <td>Ask:{{data.Ticker.Ask}}</td>
+                    <td>Bid:{{data.Ticker.Bid}}</td>
+                    <td>Low:{{data.Ticker.Low}}</td>
+                    <td>High:{{data.Ticker.High}}</td>
+                    <td>Last:{{data.Ticker.Last}}</td>
+                    <td>Volume:{{data.Ticker.Volume}}</td>
+                </tr>
+            </table>
+        </div>
+        <div class="col-md-6">
+            <table class="table-bordered">
+                <tr>
+                    <td colspan="6" style="text-align:center;font-weight:bold">Open Orders</td>
+                </tr>
+                <tr>
+                    <td>Id</td>
+                    <td>Type</td>
+                    <td>Amount</td>
+                    <td>Price</td>
+                    <td>Pending</td>
+                    <td>Time</td>
+                </tr>
+                <tr ng-repeat="order in data.Open_orders">
+                    <td>{{order.Id.Id}}
+                    <td>{{order.Type=='1'?"Satış":"Alış"}}
+                    <td>{{order.Amount}}
+                    <td>{{order.Price}}
+                    <td>{{order.Pending}}
+                    <td>{{order.Time.localtime  | date:'yyyy-MM-dd HH:mm:ss Z'}}
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-5">
+            <!-- Orderbook -->
+            <table id="history" class=" col-md-6  table-sm table-bordered table-hover " style="float:left">
+                <thead>
+                    <tr>
+                        <th style="width:100px">Fiyat</th>
+                        <th style="width:100px">Miktar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="book in data.Orderbook.Asks">
+                        <td style="width:100px;text-align:right">{{book.Price | number:4}}</td>
+                        <td style="width:100px;text-align:right">{{book.Amount| number:6}}</td>
+
+                    </tr>
+                </tbody>
+            </table>
+            <table id="history" class=" col-md-6  table-sm table-bordered table-hover ">
+                <thead>
+                    <tr>
+                        <th style="width:100px;text-align:right">Fiyat</th>
+                        <th style="width:100px;text-align:right">Miktar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="book in data.Orderbook.Bids">
+                        <td style="width:100px;text-align:right">{{book.Price | number:4}}</td>
+                        <td style="width:100px;text-align:right">{{book.Amount| number:6}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-7">
+
+            <table id="history" class=" col-md-6  table-sm table-bordered table-hover " style="float:left">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Amount <span class="symbol1">XRP</span></th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="history in data.Trade_history | filter : {Type:1}">
+
+                        <td no-wrap>{{history.Date.localtime  | date:'MM-dd HH:mm:ss'}}</td>
+                        <td>{{history.Type=='1'?"Satış":"Alış"}}</td>
+                        <td style="text-align:right">{{history.Amount | number:6}}</td>
+                        <td style="text-align:right">{{history.Price | number:4}}</td>
+                        <td style="text-align:right">{{history.Amount * history.Price  | number:2}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <table id="history" class=" col-md-6  table-sm table-bordered table-hover ">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Amount <span class="symbol1">XRP</span></th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="history in data.Trade_history | filter : {Type:0}">
+                        <td>{{history.Date.localtime  | date:'MM-dd HH:mm:ss'}}</td>
+                        <td>{{history.Type=='1'?"Satış":"Alış"}}</td>
+                        <td style="text-align:right">{{history.Amount | number:6}}</td>
+                        <td style="text-align:right">{{history.Price | number:4}}</td>
+                        <td style="text-align:right">{{history.Amount * history.Price  | number:2}}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+
+    <!--
+        <table id="history" class="table table-bordered" style="    width: 400px;">
+            <tr>
+                <td></td>
+                <td>Balance</td>
+                <td>In Orders</td>
+                <td>Total</td>
+            </tr>
+            <tr ng-repeat="(key, data) in data.Account_balance" ng-show="key=='USD' || key ='XRP' ">
+                <td>{{key}}</td>
+                <td>{{data.Available}}</td>
+                <td>{{data.Bonus}}</td>
+                <td>{{data.Orders}}</td>
+
+            </tr>
+        </table>
+    -->
+    
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.1/nv.d3.min.js"></script>
+    <script src="https://rawgit.com/krispo/angular-nvd3/v1.0.4/dist/angular-nvd3.js"></script>
+
+    <script>
+
+        // Define the `phonecatApp` module
+        var cexApp = angular.module('cexApp', ['nvd3']);
+        // Define the `PhoneListController` controller on the `phonecatApp` module
+        cexApp.controller('CexController', function CexController($scope, $http, $window) {
+            var apiBaseUrl = "app://local/api/";
+            $scope.data = { };
+            
+            $scope.getall = function () {
+                $http.get("app://local/api/").then((result) => {
+                    setTimeout(function () {
+                        $scope.$apply(function () {
+                            $scope.data = result.data;
+
+                            // 
+                            $scope.gdata = [{ values : result.data.Historical_1m_OHLCV_Chart.Result.data1h }];
+                            $scope.api.refresh();
+                        });
+                    }, 500);
+                    
+                });
+            }
+
+            $scope.getfiyatlar = function () {
+                $http.get(apiBaseUrl + "ticker").then((result) => {
+                    setTimeout(function () {
+                        $scope.$apply(function () {
+                            $scope.data.Ticker = result.data;
+                        });
+                    }, 500);
+                });
+            }
+
+            $scope.options = {
+                extended:true,
+                chart: {
+                    type: 'candlestickBarChart',
+                    height: 450,
+                    margin: {
+                        top: 20,
+                        right: 20,
+                        bottom: 66,
+                        left: 60
+                    },
+                    x: function (d) { return d['date']; },
+                    y: function (d) { return d['close']; },
+                    duration: 100,
+
+                    xAxis: {
+                        axisLabel: 'Dates',
+                        tickFormat: function (d) {
+                            return d3.time.format('%I:%M')(new Date(d * 1000));
+                        },
+                        showMaxMin: false
+                    },
+
+                    yAxis: {
+                        axisLabel: 'Stock Price',
+                        tickFormat: function (d) {
+                            return '$' + d3.format(',.4f')(d);
+                        },
+                        showMaxMin: false
+                    },
+                    zoom: {
+                        enabled: true,
+                        scaleExtent: [1, 10],
+                        useFixedDomain: false,
+                        useNiceScale: false,
+                        horizontalOff: false,
+                        verticalOff: true,
+                        unzoomEventType: 'dblclick.zoom'
+                    }
+                }
+            };
+
+            $scope.gdata = [{
+                values: [
+                    {
+                        "date": "1516838400",                        
+                        "open": 1.44,
+                        "high": 1.445,
+                        "low": 1.4227,
+                        "close": 1.43,
+                        "volume": 70379.194319
+                    },
+                    {
+                        "date": "1516842000",
+                        "open": 1.4299,
+                        "high": 1.45,
+                        "low": 1.4273,
+                        "close": 1.4324,
+                        "volume": 81400.684161
+                    }
+                ]
+            }];
+
+        });
+    </script>
+</body>
+</html>
